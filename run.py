@@ -14,7 +14,9 @@ urllib.request.urlopen("http://192.168.1.1/osc/info").read()
 # create session
 print('Create Session')
 data = json.dumps({"name":"camera.startSession"}).encode('ascii')
+print(data)
 res = urllib.request.urlopen('http://192.168.1.1/osc/commands/execute', data)
+#print(res.read().decode('utf-8'))
 sessionId = json.loads(res.read().decode('utf-8'))["results"]["sessionId"]
 
 # take a picture
