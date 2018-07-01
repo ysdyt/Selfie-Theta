@@ -5,17 +5,19 @@ import os
 from time import sleep
 
 from theta_shutter import theta_api
-
+from voice import mp3_voice
 
 # make dir path
-save_dir = './saved_dir'
+#save_dir = './saved_dir'
+save_dir = '/Users/ysdyt/Dropbox/theta_photo'
 
-theta_img_path = os.path.join(save_dir, 'theta_img')
-webcam_img_path = os.path.join(save_dir, 'webcam_img')
+#theta_img_path = os.path.join(save_dir, 'theta_img')
+#webcam_img_path = os.path.join(save_dir, 'webcam_img')
 
 if not os.path.exists(save_dir):
-    os.makedirs(theta_img_path)
-    os.makedirs(webcam_img_path)
+    raise ValueError('directory does not exists')
+#    os.makedirs(theta_img_path)
+#    os.makedirs(webcam_img_path)
 
 # set features for face-detect
 cascPath = './facedetect_features/haarcascade_frontalface_default.xml'
@@ -59,13 +61,16 @@ while True:
             prev_faces = prev_faces[drops:]
         dense = sum([1 for i in prev_faces if i > 0]) / float(len(prev_faces))
 
+        # SHOT!!!
         if len(prev_faces) >= considerable_frames and dense >= shot_dense:
-            print('shot', str(dt.datetime.now()))
-            save_fig_name = os.path.join(webcam_img_path, '{}.jpg'.format(dt.datetime.now()))
+            #save_fig_name = os.path.join(webcam_img_path, '{}.jpg'.format(dt.datetime.now()))
             #cv2.imwrite(save_fig_name, org_frame)
 
             # take theta photo
-            theta_api(theta_img_path)
+            print('shot', str(dt.datetime.now()))
+            mp3_voice('./mp3/countdown.mp3')
+            theta_api(save_dir)
+            mp3_voice('./mp3/finished.mp3')
 
             prev_faces = []
             prev_shot = dt.datetime.now()

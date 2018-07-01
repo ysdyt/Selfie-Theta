@@ -1,3 +1,5 @@
 # Selfie-Theta
 
-to be written
+- developed by Python 3.6.5
+
+more details will be written
