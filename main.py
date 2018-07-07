@@ -9,18 +9,19 @@ from theta_shutter import theta_api
 from voice import mp3_voice
 from dropbox_api import dropbox_uploader
 
-# make dir path
+
+# Make dir path
 temp_save_dir = '/Users/ysdyt/Downloads/hoge'
 dp_save_dir = '/selfie-theta'
 
 if not os.path.exists(temp_save_dir):
-    raise ValueError('directory does not exists')
+    os.makedirs(temp_save_dir)
 
-# set features for face-detect
+# Set features for face-detect
 cascPath = './facedetect_features/haarcascade_frontalface_default.xml'
 faceCascade = cv2.CascadeClassifier(cascPath)
 
-# initialize
+# Initialize and Setting parameters
 video_capture = cv2.VideoCapture(0)
 anterior = 0
 shot_dense = 0.5
@@ -42,7 +43,7 @@ while True:
     frame = cv2.resize(org_frame, (int(shape[1]/img_ratio), int(shape[0]/img_ratio)))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
-    # detect face
+    # Detect face
     faces = faceCascade.detectMultiScale(
         gray,
         scaleFactor=1.1,
@@ -61,7 +62,7 @@ while True:
         # SHOT!!!
         if len(prev_faces) >= considerable_frames and dense >= shot_dense:
 
-            # take theta photo
+            # Take theta photo
             print('shot', str(dt.datetime.now()))
             mp3_voice('./mp3/countdown.mp3')
             theta_api(temp_save_dir)
@@ -77,7 +78,7 @@ while True:
             prev_faces = []
             prev_shot = dt.datetime.now()
 
-    # visualize detected area
+    # Visualize detected area
     for (x, y, w, h) in faces:
         x_ = x*img_ratio
         y_ = y*img_ratio
@@ -85,13 +86,13 @@ while True:
         y_h_ = (y+h)*img_ratio
         cv2.rectangle(org_frame, (x_, y_), (x_w_, y_h_), (0, 255, 0), 2)
 
-    # push 'q' to stop process
+    # Push 'q' to stop process
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    # show real-time capturing
+    # Show real-time capturing
     cv2.imshow('Video', org_frame)
 
-# finish process
+# Finish process
 video_capture.release()
 cv2.destroyAllWindows()
