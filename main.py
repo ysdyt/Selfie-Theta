@@ -3,21 +3,18 @@ import cv2
 import datetime as dt
 import os
 from time import sleep
+import glob
 
 from theta_shutter import theta_api
 from voice import mp3_voice
+from dropbox_api import dropbox_uploader
 
 # make dir path
-#save_dir = './saved_dir'
-save_dir = '/Users/ysdyt/Dropbox/theta_photo'
+temp_save_dir = '/Users/ysdyt/Downloads/hoge'
+dp_save_dir = '/selfie-theta'
 
-#theta_img_path = os.path.join(save_dir, 'theta_img')
-#webcam_img_path = os.path.join(save_dir, 'webcam_img')
-
-if not os.path.exists(save_dir):
+if not os.path.exists(temp_save_dir):
     raise ValueError('directory does not exists')
-#    os.makedirs(theta_img_path)
-#    os.makedirs(webcam_img_path)
 
 # set features for face-detect
 cascPath = './facedetect_features/haarcascade_frontalface_default.xml'
@@ -63,14 +60,19 @@ while True:
 
         # SHOT!!!
         if len(prev_faces) >= considerable_frames and dense >= shot_dense:
-            #save_fig_name = os.path.join(webcam_img_path, '{}.jpg'.format(dt.datetime.now()))
-            #cv2.imwrite(save_fig_name, org_frame)
 
             # take theta photo
             print('shot', str(dt.datetime.now()))
             mp3_voice('./mp3/countdown.mp3')
-            theta_api(save_dir)
+            theta_api(temp_save_dir)
             mp3_voice('./mp3/finished.mp3')
+
+            # Upload the image to dropbox
+            file_list = glob.glob(os.path.join(temp_save_dir, '*'))
+            fn_list = [os.path.basename(file) for file in file_list]
+            sorted_list = sorted(fn_list)
+            dropbox_uploader(os.path.join(temp_save_dir, sorted_list[-1]),
+                             os.path.join(dp_save_dir, sorted_list[-1]))
 
             prev_faces = []
             prev_shot = dt.datetime.now()
