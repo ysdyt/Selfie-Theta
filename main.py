@@ -11,7 +11,7 @@ from dropbox_api import dropbox_uploader
 
 
 # Make dir path
-temp_save_dir = '/Users/ysdyt/Downloads/hoge'
+temp_save_dir = './saved_img'
 dp_save_dir = '/selfie-theta'
 
 if not os.path.exists(temp_save_dir):
