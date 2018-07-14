@@ -39,10 +39,21 @@ def theta_api(save_dir):
 
     # save photo
     print('Saving a photo')
-    data = json.dumps({"name":"camera.getImage", "parameters": {"fileUri": fileUri}}).encode('ascii')
-    res = urllib.request.urlopen('http://192.168.1.1/osc/commands/execute', data)
-    with open(os.path.join(save_dir, file_name), "wb") as file:
-            file.write(res.read())
+    content = None
+    while content is None:
+        try:
+            data = json.dumps({"name":"camera.getImage", "parameters": {"fileUri": fileUri}}).encode('ascii')
+            res = urllib.request.urlopen('http://192.168.1.1/osc/commands/execute', data)
+            content = res.read()
+            with open(os.path.join(save_dir, file_name), "wb") as file:
+                    file.write(content)
+        except urllib.error.HTTPError as err:
+            if err.code != 400:
+                print("taken photo may not be saved to the theta storage yet.")
+                raise err
+            else:
+                time.sleep(0.2)
+
     print('Saved a photo')
 
     # close session
