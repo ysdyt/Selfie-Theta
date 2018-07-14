@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import urllib.request
 
 
@@ -13,6 +14,10 @@ def theta_api(save_dir):
     res = urllib.request.urlopen('http://192.168.1.1/osc/commands/execute', data)
     sessionId = json.loads(res.read().decode('utf-8'))["results"]["sessionId"]
 
+    # record fingerprint before taking photo
+    res = urllib.request.urlopen('http://192.168.1.1/osc/state', urllib.parse.urlencode({}).encode('ascii'))
+    prev_fingerprint = fingerprint = json.loads(res.read().decode('utf-8'))["fingerprint"]
+
     # take a picture
     data = json.dumps({"name":"camera.takePicture", "parameters": {"sessionId": sessionId}}).encode('ascii')
     urllib.request.urlopen('http://192.168.1.1/osc/commands/execute', data)
@@ -20,11 +25,17 @@ def theta_api(save_dir):
 
     # get photo url
     fileUri = ""
-    while not fileUri:
+    while True:
         res = urllib.request.urlopen('http://192.168.1.1/osc/state', urllib.parse.urlencode({}).encode('ascii'))
-        fileUri = json.loads(res.read().decode('utf-8'))["state"]["_latestFileUri"]
+        j = json.loads(res.read().decode('utf-8'))
+        fingerprint = j["fingerprint"]
+        fileUri = j["state"]["_latestFileUri"]
         file_name = os.path.basename(fileUri)
-        print('new_photo_file:', file_name)
+        if not fileUri or fingerprint == prev_fingerprint:
+            time.sleep(0.2)  # avoid a load by frequent requesting on theta.
+        else:
+            print('new_photo_file:', file_name)
+            break
 
     # save photo
     print('Saving a photo')
